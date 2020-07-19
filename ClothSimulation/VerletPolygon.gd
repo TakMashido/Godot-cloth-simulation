@@ -17,11 +17,12 @@ export (int, 10) var interpolation_steps=1				#Waring each step increase computa
 #Sort polygons
 export (SortType) var x_sort=SortType.FORWARD
 export (SortType) var y_sort=SortType.FORWARD
-export (float,0,1.1) var default_connection_strength=.2
+export (float,0,1.1) var connection_compress_elasticity=.05
+export (float,0,1.1) var connection_strech_elasticity=.8
+export (float,0,2) var connection_strech_treshold=1.1
 #Subarray used in chained way - for [[1,2],[3,4,5]] adds 1,2 connections and 3,4 4,5 5,3 
 export (Array, Array, int) var additional_connections=[]
 
-var vertex_g=1.0
 var default_vertex_friction:=.999
 
 var vertexes=[]
@@ -45,7 +46,7 @@ func _ready():
 	
 	#Vertexes from polygon
 	for vertex in vertex_source:
-		vertexes.push_back(VerletEngine.add_vertex(vertex+global_position,default_vertex_friction,vertex_g))
+		vertexes.push_back(VerletEngine.add_vertex(vertex+global_position,default_vertex_friction))
 	
 	#sort polygons
 	if x_sort!=SortType.NONE or y_sort!=SortType.NONE:
@@ -86,25 +87,27 @@ func _ready():
 					polygons[i+1]=swap
 	
 	#Connections from polygon
-	var known_connections=[]
+	var known_connections=[]				#TODO change to dictionary
 	for poly in polygons:
 		if known_connections.find([poly[0],poly[poly.size()-1]])==-1:
 			known_connections.push_back([poly[0],poly[poly.size()-1]])
-			connections.push_back(VerletEngine.add_connection(vertexes[poly[0]], vertexes[poly[poly.size()-1]],default_connection_strength))
+#			connections.push_back(VerletEngine.add_linear_connection(vertexes[poly[0]], vertexes[poly[poly.size()-1]],default_connection_strength))
+			connections.push_back(VerletEngine.add_double_linear_connection(vertexes[poly[0]], vertexes[poly[poly.size()-1]], connection_compress_elasticity, connection_strech_elasticity, connection_strech_treshold))
 		for i in range(1,poly.size()):
 			if known_connections.find([poly[i],poly[i-1]])==-1:
 				known_connections.push_back([poly[i],poly[i-1]])
-				connections.push_back(VerletEngine.add_connection(vertexes[poly[i-1]], vertexes[poly[i]],default_connection_strength))
+#				connections.push_back(VerletEngine.add_linear_connection(vertexes[poly[i-1]], vertexes[poly[i]], default_connection_strength))
+				connections.push_back(VerletEngine.add_double_linear_connection(vertexes[poly[i-1]], vertexes[poly[i]], connection_compress_elasticity, connection_strech_elasticity, connection_strech_treshold))
 	
 	#Custom connections
 	for poly in additional_connections:
 		if known_connections.find([poly[0],poly[poly.size()-1]])==-1:
 			known_connections.push_back([poly[0],poly[poly.size()-1]])
-			connections.push_back(VerletEngine.add_connection(vertexes[poly[0]], vertexes[poly[poly.size()-1]],default_connection_strength))
+			connections.push_back(VerletEngine.add_double_linear_connection(vertexes[poly[0]], vertexes[poly[poly.size()-1]], connection_compress_elasticity, connection_strech_elasticity, connection_strech_treshold))
 		for i in range(1,poly.size()):
 			if known_connections.find([poly[i],poly[i-1]])==-1:
 				known_connections.push_back([poly[i],poly[i-1]])
-				connections.push_back(VerletEngine.add_connection(vertexes[poly[i-1]], vertexes[poly[i]],default_connection_strength))
+				connections.push_back(VerletEngine.add_double_linear_connection(vertexes[poly[i-1]], vertexes[poly[i]], connection_compress_elasticity, connection_strech_elasticity, connection_strech_treshold))
 	
 	#Change pointed vertices to static
 	for vertex in static_vertices:
@@ -215,8 +218,6 @@ func __interpolate_polygons():
 			print(key)
 		if static_vertices.find(key[0])!=-1 and static_vertices.find(key[1])!=-1:
 			static_vertices.append(added_vertexes[key])
-	
-#	vertex_g/=new_polygons.size()/polygons.size()						#More vertexes==heavier
 	
 	polygons=new_polygons
 	polygon=new_polygon

@@ -13,6 +13,8 @@ Godot 3.2.1
 Download reposity and load it as project in godot.
 ### In project use
 1. Add VerletEngine/VerletEngin.gd as singleton to your project
+  * Consider using multithreaded physics with it becouse, processing large numbers of point's and connections is expensive. 
+    Verlet integration by itself will run on single thread, but other element's will not run on this heavy cluttered thread.
 
 2. Add cloth node
   1. Add Polygon2d to scene, and att VerletPolygon.gd script to it.
@@ -37,13 +39,17 @@ Sort polygon faces to ensure right draw order.
 None: Distable sorting by this coordinate  
 Forward: Left/Upper site last(drawed at top)  
 Reversed: Right/Bottom site last(drawed at top).
-### Default connection strength
-Strength of connection, affect how fast connections go back to it's orginal length. Smaller values are more rubbery.
+### Connection compress elasticity
+Strength of connection, affect how fast connections go back to it's orginal length when shortened. Smaller values are more rubbery.
+### Connection strech elasticity
+Strength of connection, affect how fast connections go back to it's orginal length when shtreched. Smaller values are more rubbery.
+### Connection strech treshold
+How many times connection have to be extended to use strech elasticity instead of compress elasticity
 ### Additional connections
 Array of lists of vetices indexes(lookup static vertices) beetwen wich you want to add extra connections.  
 Each entry is treated as polygon so [1,4] add connection beetwen 1-4, and [3,7,1] adds 3-7, 1-7 and 1-3.
 
 ## TODO
-Add option to interpolate only edges- smaller amunt of vertices is barery visible on places with lesser amount, making so will increase performace by decreasing number of vertices and connections  
-Add weight to simulated vertices  
-Add non linear force connections, compressing cloth should requaire way less force than streaching
+* Add option to interpolate only edges- smaller amunt of vertices is barery visible on places with lesser amount, making so will increase performace by decreasing number of vertices and connections  
+* Add weight to simulated vertices  
+* Rewrite verlet engine as c++/C#(slower but easier to integrate with engine) module for better performace
