@@ -10,6 +10,28 @@ enum DataSource{
 	UV							#connection from uv(lenght), vertexes position from polygon
 }
 
+#Connection types:
+#None: c'mon why you would like to use this??
+#Linear: constant elasticity connection.
+#	fastest
+#	uses:
+#		strech_elasticity
+#SingleTreshold: almost constant elasticity, changes immediately to other value after reaching certain treshold.
+#	more realistic, can couse flickering
+#	use with always moving cloth to hide flickering
+#	uses:
+#		compress_elasticity
+#		strech_elasticity
+#		strech_treshold
+#DoubleTresholdLinear: changes elasticity lineary beetwen two tresholds.
+#	like single treshold but without flickering, slowest
+#	use in most important places
+#	uses:
+#		compress_elasticity
+#		strech_elasticity
+#		compress_treshold
+#		strech_treshold
+export (VerletEngine.Connection_types) var connections_type=VerletEngine.Connection_types.DoubleTresholdLinear
 export (DataSource) var data_source=DataSource.POLYGON
 #Vertices and connections data source.
 export (Array, int) var static_vertices=[]
@@ -17,9 +39,10 @@ export (int, 10) var interpolation_steps=1				#Waring each step increase computa
 #Sort polygons
 export (SortType) var x_sort=SortType.FORWARD
 export (SortType) var y_sort=SortType.FORWARD
-export (float,0,1.1) var connection_compress_elasticity=.05
-export (float,0,1.1) var connection_strech_elasticity=.8
-export (float,0,2) var connection_strech_treshold=1.1
+export (float,0,1.1) var compress_elasticity=.05
+export (float,0,1.1) var strech_elasticity=.8
+export (float,0,2) var compress_treshold=.9
+export (float,0,2) var strech_treshold=1.1
 #Subarray used in chained way - for [[1,2],[3,4,5]] adds 1,2 connections and 3,4 4,5 5,3 
 export (Array, Array, int) var additional_connections=[]
 
@@ -89,25 +112,17 @@ func _ready():
 	#Connections from polygon
 	var known_connections=[]				#TODO change to dictionary
 	for poly in polygons:
-		if known_connections.find([poly[0],poly[poly.size()-1]])==-1:
-			known_connections.push_back([poly[0],poly[poly.size()-1]])
-#			connections.push_back(VerletEngine.add_linear_connection(vertexes[poly[0]], vertexes[poly[poly.size()-1]],default_connection_strength))
-			connections.push_back(VerletEngine.add_double_linear_connection(vertexes[poly[0]], vertexes[poly[poly.size()-1]], connection_compress_elasticity, connection_strech_elasticity, connection_strech_treshold))
-		for i in range(1,poly.size()):
-			if known_connections.find([poly[i],poly[i-1]])==-1:
-				known_connections.push_back([poly[i],poly[i-1]])
-#				connections.push_back(VerletEngine.add_linear_connection(vertexes[poly[i-1]], vertexes[poly[i]], default_connection_strength))
-				connections.push_back(VerletEngine.add_double_linear_connection(vertexes[poly[i-1]], vertexes[poly[i]], connection_compress_elasticity, connection_strech_elasticity, connection_strech_treshold))
+		for con in __get_polygon_connections(poly):
+			if known_connections.find([con[0],con[1]])==-1:
+				known_connections.push_back([con[0],con[1]])
+				__add_connection(vertexes[con[0]],vertexes[con[1]])
 	
 	#Custom connections
 	for poly in additional_connections:
-		if known_connections.find([poly[0],poly[poly.size()-1]])==-1:
-			known_connections.push_back([poly[0],poly[poly.size()-1]])
-			connections.push_back(VerletEngine.add_double_linear_connection(vertexes[poly[0]], vertexes[poly[poly.size()-1]], connection_compress_elasticity, connection_strech_elasticity, connection_strech_treshold))
-		for i in range(1,poly.size()):
-			if known_connections.find([poly[i],poly[i-1]])==-1:
-				known_connections.push_back([poly[i],poly[i-1]])
-				connections.push_back(VerletEngine.add_double_linear_connection(vertexes[poly[i-1]], vertexes[poly[i]], connection_compress_elasticity, connection_strech_elasticity, connection_strech_treshold))
+		for con in __get_polygon_connections(poly):
+			if known_connections.find([con[0],con[1]])==-1:
+				known_connections.push_back([con[0],con[1]])
+				__add_connection(vertexes[con[0]],vertexes[con[1]])
 	
 	#Change pointed vertices to static
 	for vertex in static_vertices:
@@ -222,6 +237,16 @@ func __interpolate_polygons():
 	polygons=new_polygons
 	polygon=new_polygon
 	uv=new_uv
+
+func __add_connection(vertex1, vertex2):
+	if connections_type==1:
+		connections.push_back(VerletEngine.add_linear_connection(vertex1, vertex2, strech_elasticity))
+	elif connections_type==2:
+		connections.push_back(VerletEngine.add_single_treshold_connection(vertex1, vertex2, compress_elasticity, strech_elasticity, strech_treshold))
+	elif connections_type==3:
+		connections.push_back(VerletEngine.add_double_treshold_linear_connection(vertex1, vertex2, compress_elasticity, strech_elasticity, compress_treshold, strech_treshold))
+	else:
+		print("Unhandled connection type")
 
 #shourtcut for getting connections in polygons
 func __get_polygon_connections(polygon)->Array:

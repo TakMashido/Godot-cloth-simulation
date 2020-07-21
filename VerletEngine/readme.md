@@ -16,7 +16,8 @@ You can use following godot project properties:
 
 ## Connection types:
 * Linear: normal linear connection working like spring
-* DoubleLinear: Works almost like Linear, but have 2 diffrend elasticity values choosed based on extenstion value
+* SingleTreshold: Works almost like Linear, but have 2 diffrend elasticity values choosed based on extenstion value
+* DoubleTresholdLinear: Elasticity changes lineary beetwen two tresholds, otherwise constant
 
 ## Usage
 
@@ -25,3 +26,4 @@ This script does nothing by itself, it's only responsible for Verlet integration
 
 ## TODO
 * Rewrite c++/C#(slower but easier to integrate with engine) module for better performace
+* Add LUT for connection elasticity(should be faster and more memory effective)

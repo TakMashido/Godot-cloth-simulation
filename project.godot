@@ -32,6 +32,7 @@ debug_grid_toggle={
 
 [physics]
 
+2d/thread_model=2
 Verlet/debug_statistics=true
 Verlet/default_gravity=Vector2( 0, 9.8 )
 Verlet/debug_grid=false

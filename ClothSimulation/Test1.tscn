@@ -9,7 +9,7 @@ position = Vector2( 1, 0 )
 script = ExtResource( 2 )
 
 [node name="Polygon2D" type="Polygon2D" parent="."]
-position = Vector2( 699.195, 254 )
+position = Vector2( 703.482, 250.57 )
 texture = ExtResource( 1 )
 polygon = PoolVector2Array( 0, -3.8147e-06, 0, 256, 256, 256, 256, 0, 64, 3.8147e-06, 192, 0, 0, 64, 64, 64, 128, 64, 192, 64, 256, 64, 0, 128, 64, 128, 128, 128, 192, 128, 256, 128, 0, 192, 64, 192, 128, 192, 192, 192, 256, 192, 64, 256, 128, 256, 192, 256, 32, 0, 96, 3.8147e-06, 160, -3.8147e-06, 224, 3.8147e-06, 112, 0, 144, 0, 128, 0 )
 uv = PoolVector2Array( 0, -3.8147e-06, 0, 256, 256, 256, 256, 0, 64, 3.8147e-06, 192, 0, 0, 64, 64, 64, 128, 64, 192, 64, 256, 64, 0, 128, 64, 128, 128, 128, 192, 128, 256, 128, 0, 192, 64, 192, 128, 192, 192, 192, 256, 192, 64, 256, 128, 256, 192, 256, 32, 0, 96, 3.8147e-06, 160, -3.8147e-06, 224, 3.8147e-06, 112, 0, 144, 0, 128, 0 )
@@ -21,17 +21,18 @@ interpolation_steps = 0
 additional_connections = [ [ 28, 29 ] ]
 
 [node name="Polygon2D3" type="Polygon2D" parent="."]
-position = Vector2( 64.8574, 256.955 )
+position = Vector2( 67.4295, 256.955 )
 texture = ExtResource( 1 )
 polygon = PoolVector2Array( 0, 0, 256, 0, 256, 256, 0, 256, 0, 128, 128, 256, 128, 128, 256, 128, 128, 0 )
 uv = PoolVector2Array( 0, 0, 256, 0, 256, 256, 0, 256, 0, 128, 128, 256, 128, 128, 256, 128, 128, 0 )
 polygons = [ PoolIntArray( 0, 8, 6, 4 ), PoolIntArray( 6, 4, 3, 5 ), PoolIntArray( 6, 8, 1, 7 ), PoolIntArray( 6, 5, 2, 7 ) ]
 internal_vertex_count = 5
 script = ExtResource( 4 )
+connections_type = 2
 static_vertices = [ 0, 1 ]
 
 [node name="Polygon2D2" type="Polygon2D" parent="."]
-position = Vector2( 384.143, 259 )
+position = Vector2( 384.143, 258.143 )
 texture = ExtResource( 1 )
 polygon = PoolVector2Array( 256, 96, 256, 0, 256, 256, 0, 256, 192, 64, 128, 64, 64, 64, 0, 64, 0, 128, 0, 192, 64, 192, 64, 128, 64, 256, 128, 256, 192, 256, 192, 192, 128, 192, 128, 128, 192, 128, 256, 192, 256, 128, 256, 64, 192, 80, 144, 48, 192, 16 )
 uv = PoolVector2Array( 0, 0, 256, 0, 256, 256, 0, 256, 192, 64, 128, 64, 64, 64, 0, 64, 0, 128, 0, 192, 64, 192, 64, 128, 64, 256, 128, 256, 192, 256, 192, 192, 128, 192, 128, 128, 192, 128, 256, 192, 256, 128, 256, 64, 64, 0, 128, 0, 192, 0 )

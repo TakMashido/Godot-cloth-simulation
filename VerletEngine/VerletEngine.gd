@@ -9,15 +9,22 @@ var connection_process_time:=0.0
 #None->idicates non existing connection, it's processing is skipped, left after removing connection, left to not shirk arrays after removal, replaced with actual connection when new ones are added
 #Linear->ideal spring, uses:
 #	connection_elasticity
-#Double linear->ideal spring with elasticity change, uses:
+#SingleTreshlod->ideal spring with elasticity change after reaching certin treshold, uses:
 #	connection_elasticity
 #	connection_elasticity2
-#	connection_elsaticy_treshold-> treshold for elasticity change, omperad directyly with actual connection length
+#	connection_elsaticy_treshold-> treshold for elasticity change, compered directyly with actual connection length
 #	connection_elsaticy_offset-> substracted from final force to ensure continus function
+#DoubleTresholdLinear-> elascity calculated similar to SingleTreshold, but uses 2 tresholds and scales it lineary beetwen them, uses:
+#	connection_elastiticity
+#	connection_elastiticity2
+#	connection_elasticity_treshold-> treshold for elasticity change, compered directyly with actual connection length, if length smaller connection_elascity used
+#	connection_elasticity_treshold2-> second treshold for elasticity change, comperad directyly with actual connection length, if length bigger then connection elascity2 used
+#	connection_elasticity_offset-> cached treshold2-treshold, varaible access in godot is very expensive
 enum Connection_types{#In critical parts of code values are used intead of Connection_types.[...], way faster.
 	None=0,
 	Linear=1,
-	DoubleLinear=2					#2 linear, ___---- function, diffrend elasticity after certain point
+	SingleTreshold=2					#treshold function based, ___---- function, diffrend elasticity after certain point
+	DoubleTresholdLinear=3				#2 treshold linear, ____/----  function, elascity changes lineary beetwen certain points
 }
 
 var vertex_position:=PoolVector2Array()
@@ -32,6 +39,7 @@ var connection_length:=PoolRealArray()
 var connection_elasticity:=PoolRealArray()
 var connection_elasticity2:=PoolRealArray()
 var connection_elasticity_treshold:=PoolRealArray()
+var connection_elasticity_treshold2:=PoolRealArray()
 var connection_elasticity_offset:=PoolRealArray()
 
 var free_vertexes=[]
@@ -94,24 +102,33 @@ func remove_vertex(id):
 #Add connection beetwen vertexes. Returns id of added connection
 #@param length: if >0 used as connectio lengt else final_length=distance_beetwen_points*(-length)
 #Warning not async
-func add_linear_connection(vertex_id,vertex2_id,elasticity=1.0,length:=-1.0):
-	__add_connection(Connection_types.Linear,vertex_id,vertex2_id,length,elasticity,elasticity,.0,.0)
+func add_linear_connection(vertex_id,vertex2_id,elasticity=1.0,length:=-1.0)-> int:
+	return __add_connection(Connection_types.Linear,vertex_id,vertex2_id,elasticity,elasticity,.0,.0,.0,length)
 
 #Add connection beetwen vertexes. Returns id of added connection
 #@param treshold: float>.0, use to choose witch elasticity apply, if actual_lenght/normal_length>treshold elasticity2 is used
 #@param length: if >0 used as connectio lengt else final_length=distance_beetwen_points*(-length)
 #Warning not async
-func add_double_linear_connection(vertex_id,vertex2_id,elasticity=.9,elasticity2=1.0,treshold=.5,length:=-1.0):
+func add_single_treshold_connection(vertex_id,vertex2_id,elasticity=.5,elasticity2=.9,treshold=.5,length:=-1.0)-> int:
 	if length<.0:
-		length=vertex_position[vertex_id].distance_to(vertex_position[vertex2_id])
+		length*=-vertex_position[vertex_id].distance_to(vertex_position[vertex2_id])
 	
 	treshold*=length
 	
 	var elasticity_offset=treshold*elasticity
 	
-	__add_connection(Connection_types.DoubleLinear,vertex_id,vertex2_id,length,elasticity,elasticity2,treshold,elasticity_offset)
+	return __add_connection(Connection_types.SingleTreshold,vertex_id,vertex2_id,elasticity,elasticity2,treshold,.0,elasticity_offset,length)
 
-func __add_connection(type,vertex_id,vertex2_id,length,elasticity,elasticity2,elasticity_treshold,elasticity_offset):
+func add_double_treshold_linear_connection(vertex_id,vertex2_id,elasticity=.5,elasticity2=.9,treshold=.5,treshold2=.9,length:=-1.0)-> int:
+	if length<.0:
+		length*=-vertex_position[vertex_id].distance_to(vertex_position[vertex2_id])
+	
+	treshold*=length
+	treshold2*=length
+	
+	return __add_connection(Connection_types.DoubleTresholdLinear,vertex_id,vertex2_id,elasticity,elasticity2,treshold,treshold2,treshold2-treshold,length)
+
+func __add_connection(type,vertex_id,vertex2_id,elasticity,elasticity2,elasticity_treshold,elasticity_treshold2,elasticity_offset,length)-> int:
 	if length<.0:
 		length*=-vertex_position[vertex_id].distance_to(vertex_position[vertex2_id])
 	
@@ -131,6 +148,7 @@ func __add_connection(type,vertex_id,vertex2_id,length,elasticity,elasticity2,el
 		connection_elasticity.push_back(elasticity)
 		connection_elasticity2.push_back(elasticity2)
 		connection_elasticity_treshold.push_back(elasticity_treshold)
+		connection_elasticity_treshold2.push_back(elasticity_treshold2)
 		connection_elasticity_offset.push_back(elasticity_offset)
 	else:
 		id=free_connections.pop_back()
@@ -142,6 +160,7 @@ func __add_connection(type,vertex_id,vertex2_id,length,elasticity,elasticity2,el
 		connection_elasticity[id]=elasticity
 		connection_elasticity2[id]=elasticity2
 		connection_elasticity_treshold[id]=elasticity_treshold
+		connection_elasticity_treshold2[id]=elasticity_treshold2
 		connection_elasticity_offset[id]=elasticity_offset
 	
 	return id
@@ -153,18 +172,18 @@ func remove_connection(id):
 
 var accum_delta:=.0
 var delta_treshold=.5
-var a=true
+#var a=true
 func _physics_process(delta):
 #	accum_delta+=delta
 #	if accum_delta<delta_treshold:
 #		return
 #	accum_delta-=delta_treshold
 	
-	if a:
-		__process_vertex(delta)
-	else:
-		__process_connection(delta)
-	a=a!=true
+#	if a:
+#		__process_vertex(delta)
+#	else:
+#		__process_connection(delta)
+#	a=a!=true
 	
 	var time=OS.get_system_time_msecs()
 	__process_vertex(delta)
@@ -192,7 +211,8 @@ func __process_vertex(delta):
 
 func __process_connection(_delta):
 	for id in range(0,connection_vertex1.size()):
-		if connection_type[id]==0:
+		var con_type=connection_type[id]
+		if con_type==0:
 			continue
 		
 		var pos1=vertex_position[connection_vertex1[id]]
@@ -205,13 +225,22 @@ func __process_connection(_delta):
 			var tangent=distance_vec.y/distance_vec.x
 			
 			var force: float
-			if connection_type[id]==1:
+			if con_type==1:
 				force=(length-connection_length[id])/2.0*connection_elasticity[id]
-			elif connection_type[id]==2:
+			elif con_type==2:
 				if length<=connection_elasticity_treshold[id]:
 					force=(length-connection_length[id])/2.0*connection_elasticity[id]
 				else:
 					force=((length-connection_length[id])*connection_elasticity2[id]-connection_elasticity_offset[id])/2.0
+			elif con_type==3:
+				if length<=connection_elasticity_treshold[id]:
+					force=(length-connection_length[id])*connection_elasticity[id]/2.0
+				elif length>=connection_elasticity_treshold2[id]:
+					force=((length-connection_length[id])*connection_elasticity2[id])/2.0
+				else:
+#					force=((length-connection_length[id])*connection_elasticity2[id])/2.0
+					var interpolation=(length-connection_elasticity_treshold[id])/connection_elasticity_offset[id]
+					force=(length-connection_length[id])/2.0*(connection_elasticity[id]*(1-interpolation)+connection_elasticity2[id]*interpolation)
 			
 			var dx=sinn*force
 			var pos_delta=Vector2(dx,dx*tangent)

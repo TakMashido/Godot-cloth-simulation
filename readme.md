@@ -24,6 +24,8 @@ Download reposity and load it as project in godot.
 
 ## Script Variables
 
+### Connection type
+Check connection types in VerletEngine
 ### Data Source
 Polygon: Vertex settuped as seen in Polygon2D uv editor  
 UV: Lenght and connection grid form uv, final vertex positions from polygon vertexes position
@@ -39,17 +41,19 @@ Sort polygon faces to ensure right draw order.
 None: Distable sorting by this coordinate  
 Forward: Left/Upper site last(drawed at top)  
 Reversed: Right/Bottom site last(drawed at top).
-### Connection compress elasticity
+### Compress elasticity
 Strength of connection, affect how fast connections go back to it's orginal length when shortened. Smaller values are more rubbery.
-### Connection strech elasticity
+### Strech elasticity
 Strength of connection, affect how fast connections go back to it's orginal length when shtreched. Smaller values are more rubbery.
-### Connection strech treshold
+### Compression treshold
+Used by DoubleTresholdLInear connections to determine when start interpolating elascity
+### Strech treshold
 How many times connection have to be extended to use strech elasticity instead of compress elasticity
 ### Additional connections
 Array of lists of vetices indexes(lookup static vertices) beetwen wich you want to add extra connections.  
 Each entry is treated as polygon so [1,4] add connection beetwen 1-4, and [3,7,1] adds 3-7, 1-7 and 1-3.
 
 ## TODO
-* Add option to interpolate only edges- smaller amunt of vertices is barery visible on places with lesser amount, making so will increase performace by decreasing number of vertices and connections  
+* Add option to interpolate only edges: smaller amunt of vertices is barery visible on places with lesser amount of details, making so will increase performace by decreasing number of vertices and connections without big quality decrease 
 * Add weight to simulated vertices  
 * Rewrite verlet engine as c++/C#(slower but easier to integrate with engine) module for better performace
