@@ -218,29 +218,31 @@ func __process_connection(_delta):
 		var pos1=vertex_position[connection_vertex1[id]]
 		var pos2=vertex_position[connection_vertex2[id]]
 		
-		var distance_vec=pos1-pos2
-		if distance_vec.x!=0:			#TODO very small x can lead to big rounding error. Some ditortion visible on simulation dunno if it's this
-			var length=distance_vec.length()
+		var distance_vec=pos1-pos2			#TODO very small x can lead to big rounding error. Some ditortion visible on simulation dunno if it's this
+		
+		var length=distance_vec.length()
+		
+		var force: float
+		if con_type==1:
+			force=(length-connection_length[id])/2.0*connection_elasticity[id]
+		elif con_type==2:
+			if length<=connection_elasticity_treshold[id]:
+				force=(length-connection_length[id])/2.0*connection_elasticity[id]
+			else:
+				force=((length-connection_length[id])*connection_elasticity2[id]-connection_elasticity_offset[id])/2.0
+		elif con_type==3:
+			if length<=connection_elasticity_treshold[id]:
+				force=(length-connection_length[id])*connection_elasticity[id]/2.0
+			elif length>=connection_elasticity_treshold2[id]:
+				force=((length-connection_length[id])*connection_elasticity2[id])/2.0
+			else:
+#				force=((length-connection_length[id])*connection_elasticity2[id])/2.0
+				var interpolation=(length-connection_elasticity_treshold[id])/connection_elasticity_offset[id]
+				force=(length-connection_length[id])/2.0*(connection_elasticity[id]*(1-interpolation)+connection_elasticity2[id]*interpolation)
+		
+		if distance_vec.x!=0:
 			var sinn=distance_vec.x/length
 			var tangent=distance_vec.y/distance_vec.x
-			
-			var force: float
-			if con_type==1:
-				force=(length-connection_length[id])/2.0*connection_elasticity[id]
-			elif con_type==2:
-				if length<=connection_elasticity_treshold[id]:
-					force=(length-connection_length[id])/2.0*connection_elasticity[id]
-				else:
-					force=((length-connection_length[id])*connection_elasticity2[id]-connection_elasticity_offset[id])/2.0
-			elif con_type==3:
-				if length<=connection_elasticity_treshold[id]:
-					force=(length-connection_length[id])*connection_elasticity[id]/2.0
-				elif length>=connection_elasticity_treshold2[id]:
-					force=((length-connection_length[id])*connection_elasticity2[id])/2.0
-				else:
-#					force=((length-connection_length[id])*connection_elasticity2[id])/2.0
-					var interpolation=(length-connection_elasticity_treshold[id])/connection_elasticity_offset[id]
-					force=(length-connection_length[id])/2.0*(connection_elasticity[id]*(1-interpolation)+connection_elasticity2[id]*interpolation)
 			
 			var dx=sinn*force
 			var pos_delta=Vector2(dx,dx*tangent)
@@ -248,11 +250,11 @@ func __process_connection(_delta):
 			vertex_position[connection_vertex1[id]]-=pos_delta
 			vertex_position[connection_vertex2[id]]+=pos_delta
 		else:
-#			print("Finish vertical connection processing")
-			var length_delta=(distance_vec.y-connection_length[id])/2.0*connection_elasticity[id]
-			
-			vertex_position[connection_vertex1[id]].y-=length_delta
-			vertex_position[connection_vertex2[id]].y+=length_delta
+			print("a",OS.get_system_time_msecs()%1000)
+			if distance_vec.y<0:
+				force*=-1
+			vertex_position[connection_vertex1[id]].y-=force
+			vertex_position[connection_vertex2[id]].y+=force
 
 func _process(_delta):
 	update()
