@@ -32,8 +32,11 @@ enum DataSource{
 #		compress_treshold
 #		strech_treshold
 export (VerletEngine.Connection_types) var connections_type=VerletEngine.Connection_types.DoubleTresholdLinear
-export (DataSource) var data_source=DataSource.POLYGON
 #Vertices and connections data source.
+export (DataSource) var data_source=DataSource.POLYGON
+#Make vertices with diffrend uv and polygon positions static
+export (bool) var displaced_static=true
+#Which vertices are static, if entry is negative *-1 vertices of it removed after static addition process
 export (Array, int) var static_vertices=[]
 export (int, 10) var interpolation_steps=1				#Waring each step increase computation time ~4 times
 #Sort polygons
@@ -41,17 +44,21 @@ export (SortType) var x_sort=SortType.FORWARD
 export (SortType) var y_sort=SortType.FORWARD
 export (float,0,1.1) var compress_elasticity=.05
 export (float,0,1.1) var strech_elasticity=.8
-export (float,0,2) var compress_treshold=.9
+export (float,0,2) var compress_treshold=.8
 export (float,0,2) var strech_treshold=1.1
 #Subarray used in chained way - for [[1,2],[3,4,5]] adds 1,2 connections and 3,4 4,5 5,3 
 export (Array, Array, int) var additional_connections=[]
 
-var default_vertex_friction:=.999
+var default_vertex_friction:=.99
 
-var vertexes=[]
-var connections=[]
+var vertexes=PoolIntArray()
+var connections=PoolIntArray()
 
 func _ready():
+	for i in range(polygon.size()):
+		if polygon[i]!=uv[i] and static_vertices.find(i)==-1:
+			static_vertices.push_back(i)
+	
 	for _i in range(0,interpolation_steps):
 		__interpolate_polygons()
 	
@@ -114,14 +121,14 @@ func _ready():
 	for poly in polygons:
 		for con in __get_polygon_connections(poly):
 			if known_connections.find([con[0],con[1]])==-1:
-				known_connections.push_back([con[0],con[1]])
+				known_connections.append([con[0],con[1]])
 				__add_connection(vertexes[con[0]],vertexes[con[1]])
 	
 	#Custom connections
 	for poly in additional_connections:
 		for con in __get_polygon_connections(poly):
 			if known_connections.find([con[0],con[1]])==-1:
-				known_connections.push_back([con[0],con[1]])
+				known_connections.append([con[0],con[1]])
 				__add_connection(vertexes[con[0]],vertexes[con[1]])
 	
 	#Change pointed vertices to static
@@ -129,22 +136,22 @@ func _ready():
 		VerletEngine.vertex_friction[vertexes[vertex]]=.0
 	
 	#Calculate verticles "weight" based on local point density
-	var neighborhood_weight=PoolRealArray()
-	for vertex in vertexes:
-		var weight=1.0
-		for vertex2 in vertexes:
-			var distance=VerletEngine.vertex_position[vertex].distance_to(VerletEngine.vertex_position[vertex2])
-			if distance==0:
-				continue
-			weight+=1.0/distance
-		neighborhood_weight.append(weight*2.0)
-	var min_weight=neighborhood_weight[0]
-	for weight in neighborhood_weight:
-		if weight<min_weight:
-			min_weight=weight
-	for i in range(neighborhood_weight.size()):
-		neighborhood_weight[i]/=min_weight
-		VerletEngine.vertex_gravity[vertexes[i]]/=Vector2(neighborhood_weight[i],neighborhood_weight[i])
+#	var neighborhood_weight=PoolRealArray()
+#	for vertex in vertexes:
+#		var weight=1.0
+#		for vertex2 in vertexes:
+#			var distance=VerletEngine.vertex_position[vertex].distance_to(VerletEngine.vertex_position[vertex2])
+#			if distance==0:
+#				continue
+#			weight+=1.0/distance
+#		neighborhood_weight.append(weight*2.0)
+#	var min_weight=neighborhood_weight[0]
+#	for weight in neighborhood_weight:
+#		if weight<min_weight:
+#			min_weight=weight
+#	for i in range(neighborhood_weight.size()):
+#		neighborhood_weight[i]/=min_weight
+#		VerletEngine.vertex_gravity[vertexes[i]]/=Vector2(neighborhood_weight[i],neighborhood_weight[i])
 	
 	#Data source fixes
 	if data_source==DataSource.UV:
@@ -152,6 +159,8 @@ func _ready():
 			var pos=polygon[i]+global_position
 			VerletEngine.vertex_position[vertexes[i]]=pos
 			VerletEngine.vertex_previous_position[vertexes[i]]=pos
+	
+	VerletEngine.remove_static_connections(connections)
 	
 #	displace_vertexes(32)
 
@@ -229,8 +238,6 @@ func __interpolate_polygons():
 	
 	#Make vertexes beetwen 2 static vertexes static
 	for key in added_vertexes.keys():
-		if key[0]>key[1]:
-			print(key)
 		if static_vertices.find(key[0])!=-1 and static_vertices.find(key[1])!=-1:
 			static_vertices.append(added_vertexes[key])
 	
@@ -240,11 +247,11 @@ func __interpolate_polygons():
 
 func __add_connection(vertex1, vertex2):
 	if connections_type==1:
-		connections.push_back(VerletEngine.add_linear_connection(vertex1, vertex2, strech_elasticity))
+		connections.append(VerletEngine.add_linear_connection(vertex1, vertex2, strech_elasticity))
 	elif connections_type==2:
-		connections.push_back(VerletEngine.add_single_treshold_connection(vertex1, vertex2, compress_elasticity, strech_elasticity, strech_treshold))
+		connections.append(VerletEngine.add_single_treshold_connection(vertex1, vertex2, compress_elasticity, strech_elasticity, strech_treshold))
 	elif connections_type==3:
-		connections.push_back(VerletEngine.add_double_treshold_linear_connection(vertex1, vertex2, compress_elasticity, strech_elasticity, compress_treshold, strech_treshold))
+		connections.append(VerletEngine.add_double_treshold_linear_connection(vertex1, vertex2, compress_elasticity, strech_elasticity, compress_treshold, strech_treshold))
 	else:
 		print("Unhandled connection type")
 
@@ -297,9 +304,11 @@ func displace_vertexes(displacement):
 
 onready var previus_global_position:=global_position
 func _physics_process(_delta):
-	for vertex in static_vertices:
-		VerletEngine.vertex_previous_position[vertexes[vertex]]+=global_position-previus_global_position
-	previus_global_position=global_position
+	var position_delta=global_position-previus_global_position
+	if position_delta.length()>.01:
+		for vertex in static_vertices:
+			VerletEngine.vertex_previous_position[vertexes[vertex]]+=position_delta
+		previus_global_position=global_position
 	
 	for i in range(vertexes.size()):
 		polygon[i]=VerletEngine.vertex_position[vertexes[i]]-global_position

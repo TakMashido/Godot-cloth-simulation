@@ -12,7 +12,6 @@ polygon = PoolVector2Array( 0, 0, 0, 256, 256, 256, 256, 0 )
 uv = PoolVector2Array( 0, 0, 0, 256, 256, 256, 256, 0 )
 polygons = [ PoolIntArray( 0, 3, 2, 1 ) ]
 script = ExtResource( 1 )
-static_vertices = [ 0, 3 ]
 interpolation_steps = 5
 
 [node name="Polygon2D2" type="Polygon2D" parent="."]
@@ -22,7 +21,6 @@ polygon = PoolVector2Array( 64, 0, 0, 128, 128, 256, 256, 128, 192, 0 )
 uv = PoolVector2Array( 64, 0, 0, 128, 128, 256, 256, 128, 192, 0 )
 polygons = [ PoolIntArray( 0, 4, 3, 2, 1 ) ]
 script = ExtResource( 1 )
-static_vertices = [ 0, 4 ]
 interpolation_steps = 5
 
 [node name="Label" type="Label" parent="."]

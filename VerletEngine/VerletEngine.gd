@@ -17,7 +17,7 @@ var connection_process_time:=0.0
 #DoubleTresholdLinear-> elascity calculated similar to SingleTreshold, but uses 2 tresholds and scales it lineary beetwen them, uses:
 #	connection_elastiticity
 #	connection_elastiticity2
-#	connection_elasticity_treshold-> treshold for elasticity change, compered directyly with actual connection length, if length smaller connection_elascity used
+#	connection_elasticity_freshold-> treshold for elasticity change, compered directyly with actual connection length, if length smaller connection_elascity used
 #	connection_elasticity_treshold2-> second treshold for elasticity change, comperad directyly with actual connection length, if length bigger then connection elascity2 used
 #	connection_elasticity_offset-> cached treshold2-treshold, varaible access in godot is very expensive
 enum Connection_types{#In critical parts of code values are used intead of Connection_types.[...], way faster.
@@ -250,12 +250,25 @@ func __process_connection(_delta):
 			vertex_position[connection_vertex1[id]]-=pos_delta
 			vertex_position[connection_vertex2[id]]+=pos_delta
 		else:
-			print("a",OS.get_system_time_msecs()%1000)
 			if distance_vec.y<0:
 				force*=-1
 			vertex_position[connection_vertex1[id]].y-=force
 			vertex_position[connection_vertex2[id]].y+=force
 
+#<Service><Service><Service><Service><Service><Service><Service>
+func remove_static_connections(var connection_array:PoolIntArray):
+	var end=connection_array.size()
+	var i=0
+	while i<end:
+		var con=connection_array[i]
+		if vertex_friction[connection_vertex1[con]]==.0 and vertex_friction[connection_vertex2[con]]==.0:
+			connection_array.remove(i)
+			remove_connection(con)
+			end-=1
+			continue
+		i+=1
+
+#<Debug><Debug><Debug><Debug><Debug><Debug><Debug><Debug><Debug>
 func _process(_delta):
 	update()
 	
@@ -280,8 +293,10 @@ func _draw():
 	var rect=Rect2(.0,.0,4.0,4.0)
 	
 	for connection in range(connection_vertex1.size()):
-		draw_line(vertex_position[connection_vertex1[connection]], vertex_position[connection_vertex2[connection]], Color.green)
+		if connection_type[connection]!=0:
+			draw_line(vertex_position[connection_vertex1[connection]], vertex_position[connection_vertex2[connection]], Color.green)
 	
-	for vertex in vertex_position:
-		rect.position=vertex-Vector2(2.0,2.0)
-		draw_rect(rect,Color.red)
+	for vertex in range(vertex_position.size()):
+		if vertex_friction[vertex]!=-1.0:
+			rect.position=vertex_position[vertex]-Vector2(2.0,2.0)
+			draw_rect(rect,Color.red)
