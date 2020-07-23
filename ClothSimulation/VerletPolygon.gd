@@ -78,6 +78,31 @@ func _ready():
 	for vertex in vertex_source:
 		vertexes.push_back(VerletEngine.add_vertex(vertex+global_position,default_vertex_friction))
 	
+	#Connections from polygon
+	var known_connections=[]				#TODO change to dictionary
+	for poly in polygons:
+		for con in __get_polygon_connections(poly):
+			if known_connections.find([con[0],con[1]])==-1:
+				known_connections.append([con[0],con[1]])
+				__add_connection(vertexes[con[0]],vertexes[con[1]])
+	
+	var new_poly=[]
+	#Triangelization
+	for poly in polygons:
+		match poly.size():
+			3:
+				new_poly.append(poly)
+			4:
+				new_poly.append([poly[0],poly[1],poly[2]])
+				new_poly.append([poly[0],poly[2],poly[3]])
+			_:
+				new_poly.append(poly)
+				
+#				for i in range(1,poly.size()-1):
+#					new_poly.append([poly[0],poly[i],poly[i+1]])
+	
+	polygons=new_poly
+	
 	#sort polygons
 	if x_sort!=SortType.NONE or y_sort!=SortType.NONE:
 		#Calculate polygon centers(vertexes position avarage) for sorting
@@ -115,14 +140,6 @@ func _ready():
 					swap=polygons[i]
 					polygons[i]=polygons[i+1]
 					polygons[i+1]=swap
-	
-	#Connections from polygon
-	var known_connections=[]				#TODO change to dictionary
-	for poly in polygons:
-		for con in __get_polygon_connections(poly):
-			if known_connections.find([con[0],con[1]])==-1:
-				known_connections.append([con[0],con[1]])
-				__add_connection(vertexes[con[0]],vertexes[con[1]])
 	
 	#Custom connections
 	for poly in additional_connections:
