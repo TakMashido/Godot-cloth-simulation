@@ -22,7 +22,9 @@ interpolation_steps = 0
 additional_connections = [ [ 28, 29 ] ]
 
 [node name="Polygon2D3" type="Polygon2D" parent="."]
-position = Vector2( 67.5602, 256.415 )
+position = Vector2( 109.304, 193.738 )
+rotation = 0.76969
+scale = Vector2( 0.5, 0.5 )
 texture = ExtResource( 1 )
 polygon = PoolVector2Array( 0, 0, 256, 0, 256, 256, 0, 256, 0, 128, 128, 256, 128, 128, 256, 128, 128, 0 )
 uv = PoolVector2Array( 0, 0, 256, 0, 256, 256, 0, 256, 0, 128, 128, 256, 128, 128, 256, 128, 128, 0 )

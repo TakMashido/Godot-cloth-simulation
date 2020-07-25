@@ -36,7 +36,7 @@ export (VerletEngine.Connection_types) var connections_type=VerletEngine.Connect
 export (DataSource) var data_source=DataSource.POLYGON
 #Make vertices with diffrend uv and polygon positions static
 export (bool) var displaced_static=true
-#Which vertices are static, if entry is negative *-1 vertices of it removed after static addition process
+#Which vertices are static
 export (Array, int) var static_vertices=[]
 export (int, 10) var interpolation_steps=1				#Waring each step increase computation time ~4 times
 #Sort polygons
@@ -52,7 +52,7 @@ export (Array, Array, int) var additional_connections=[]
 var default_vertex_friction:=.99
 
 var vertexes=PoolIntArray()
-var connections=PoolIntArray()
+var connections={}							#[ver1, ver2]->con_id
 
 func _ready():
 	for i in range(polygon.size()):
@@ -76,15 +76,12 @@ func _ready():
 	
 	#Vertexes from polygon
 	for vertex in vertex_source:
-		vertexes.push_back(VerletEngine.add_vertex(vertex+global_position,default_vertex_friction))
+		vertexes.push_back(VerletEngine.add_vertex(__get_global_point_position(vertex),default_vertex_friction))
 	
 	#Connections from polygon
-	var known_connections=[]				#TODO change to dictionary
 	for poly in polygons:
 		for con in __get_polygon_connections(poly):
-			if known_connections.find([con[0],con[1]])==-1:
-				known_connections.append([con[0],con[1]])
-				__add_connection(vertexes[con[0]],vertexes[con[1]])
+			__add_connection(vertexes[con[0]],vertexes[con[1]])
 	
 	var new_poly=[]
 	#Triangelization
@@ -144,9 +141,7 @@ func _ready():
 	#Custom connections
 	for poly in additional_connections:
 		for con in __get_polygon_connections(poly):
-			if known_connections.find([con[0],con[1]])==-1:
-				known_connections.append([con[0],con[1]])
-				__add_connection(vertexes[con[0]],vertexes[con[1]])
+			__add_connection(vertexes[con[0]],vertexes[con[1]])
 	
 	#Change pointed vertices to static
 	for vertex in static_vertices:
@@ -262,15 +257,29 @@ func __interpolate_polygons():
 	polygon=new_polygon
 	uv=new_uv
 
+
+func __get_global_point_position(position)->Vector2:
+	return position.rotated(rotation)+global_position
+func __get_local_point_position(position)->Vector2:
+	return (position-global_position).rotated(-rotation)
+
 func __add_connection(vertex1, vertex2):
+	var key=[vertex1,vertex2]
+	if connections.get(key)!=null:
+		return
+	
+	var con_id=-1
 	if connections_type==1:
-		connections.append(VerletEngine.add_linear_connection(vertex1, vertex2, strech_elasticity))
+		con_id=VerletEngine.add_linear_connection(vertex1, vertex2, strech_elasticity)
 	elif connections_type==2:
-		connections.append(VerletEngine.add_single_treshold_connection(vertex1, vertex2, compress_elasticity, strech_elasticity, strech_treshold))
+		con_id=VerletEngine.add_single_treshold_connection(vertex1, vertex2, compress_elasticity, strech_elasticity, strech_treshold)
 	elif connections_type==3:
-		connections.append(VerletEngine.add_double_treshold_linear_connection(vertex1, vertex2, compress_elasticity, strech_elasticity, compress_treshold, strech_treshold))
+		con_id=VerletEngine.add_double_treshold_linear_connection(vertex1, vertex2, compress_elasticity, strech_elasticity, compress_treshold, strech_treshold)
 	else:
 		print("Unhandled connection type")
+	
+	if con_id!=-1:
+		connections[key]=con_id
 
 #shourtcut for getting connections in polygons
 func __get_polygon_connections(polygon)->Array:
@@ -328,4 +337,4 @@ func _physics_process(_delta):
 		previus_global_position=global_position
 	
 	for i in range(vertexes.size()):
-		polygon[i]=VerletEngine.vertex_position[vertexes[i]]-global_position
+		polygon[i]=__get_local_point_position(VerletEngine.vertex_position[vertexes[i]])
