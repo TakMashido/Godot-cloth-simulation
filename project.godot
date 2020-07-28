@@ -20,7 +20,7 @@ config/icon="res://icon.png"
 
 [autoload]
 
-VerletEngine="*res://VerletEngine/VerletEngine.gd"
+VerletEngine="*res://Lib/VerletEngine.gd"
 AnaliticGeometry="*res://Lib/AnaliticGeometry.gd"
 
 [input]
@@ -28,6 +28,16 @@ AnaliticGeometry="*res://Lib/AnaliticGeometry.gd"
 debug_grid_toggle={
 "deadzone": 0.5,
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777244,"unicode":0,"echo":false,"script":null)
+ ]
+}
+rotate_right={
+"deadzone": 0.5,
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":69,"unicode":0,"echo":false,"script":null)
+ ]
+}
+rotate_left={
+"deadzone": 0.5,
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":81,"unicode":0,"echo":false,"script":null)
  ]
 }
 

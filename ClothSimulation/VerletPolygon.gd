@@ -494,12 +494,19 @@ func displace_vertexes(displacement):
 			VerletEngine.vertex_previous_position[vertex]+=Vector2(rand_range(-displacement,displacement),rand_range(-displacement,displacement))
 
 onready var previus_global_position:=global_position
+onready var previus_rotation:=global_rotation
 func _physics_process(_delta):
 	var position_delta=global_position-previus_global_position
 	if position_delta.length()>.01:
 		for vertex in static_vertices:
 			VerletEngine.vertex_previous_position[vertexes[vertex]]+=position_delta
 		previus_global_position=global_position
+	
+	var rotation_delta=global_rotation-previus_rotation
+	if abs(rotation_delta)>.01:				#<1 deegre
+		for vertex in static_vertices:
+			VerletEngine.vertex_previous_position[vertexes[vertex]]=(VerletEngine.vertex_previous_position[vertexes[vertex]]-global_position).rotated(rotation_delta)+global_position
+		previus_rotation=global_rotation
 	
 	for i in range(vertexes.size()):
 		polygon[i]=__get_local_point_position(VerletEngine.vertex_position[vertexes[i]])
