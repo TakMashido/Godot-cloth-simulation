@@ -5,6 +5,7 @@ var debug_statistics:=false setget set_debug_statistics, get_debug_statistics
 var __debug_hud
 var vertex_process_time:=0.0
 var connection_process_time:=0.0
+var debug_grid_draw_time:=.0
 
 #None->idicates non existing connection, it's processing is skipped, left after removing connection, left to not shirk arrays after removal, replaced with actual connection when new ones are added
 #Linear->ideal spring, uses:
@@ -29,7 +30,7 @@ enum Connection_types{#In critical parts of code values are used intead of Conne
 
 var vertex_position:=PoolVector2Array()
 var vertex_previous_position:=PoolVector2Array()
-var vertex_friction:=PoolRealArray()					#-1.0 indicates no existing
+var vertex_friction:=PoolRealArray()					#-1.0 indicates no existing, value is actually 1.0-friction, multiplier for displacement
 var vertex_gravity:=PoolVector2Array()
 
 var connection_type:=PoolByteArray()
@@ -256,7 +257,10 @@ func __process_connection(_delta):
 			vertex_position[connection_vertex2[id]].y+=force
 
 #<Service><Service><Service><Service><Service><Service><Service>
-func remove_static_connections(var connection_array:PoolIntArray):
+func remove_static_connections(var connection_array):
+	if connection_array is Dictionary:
+		connection_array=connection_array.values()
+	
 	var end=connection_array.size()
 	var i=0
 	while i<end:
@@ -273,7 +277,10 @@ func _process(_delta):
 	update()
 	
 	if debug_statistics:
-		$HUD/Label.text="vertices:       %6d  %4.2fms\nconnections: %6d  %4.2fms\nmouse position: %s"%[vertex_position.size()-free_vertexes.size(),vertex_process_time,connection_vertex1.size()-free_vertexes.size(),connection_process_time,get_global_mouse_position()]
+		$HUD/Label.text="vertices:       %6d  %4.2fms\nconnections: %6d  %4.2fms"%[vertex_position.size()-free_vertexes.size(),vertex_process_time,connection_vertex1.size()-free_vertexes.size(),connection_process_time]
+		if debug_grid:
+			$HUD/Label.text+="\ngrid draw: %4.2fms"%debug_grid_draw_time
+		$HUD/Label.text+="\nmouse position: %s"%get_global_mouse_position()
 
 func set_debug_statistics(val):
 	if debug_statistics==val:
@@ -290,6 +297,8 @@ func _draw():
 	if !debug_grid:
 		return
 	
+	var time=OS.get_system_time_msecs()
+	
 	var rect=Rect2(.0,.0,4.0,4.0)
 	
 	for connection in range(connection_vertex1.size()):
@@ -299,4 +308,9 @@ func _draw():
 	for vertex in range(vertex_position.size()):
 		if vertex_friction[vertex]!=-1.0:
 			rect.position=vertex_position[vertex]-Vector2(2.0,2.0)
-			draw_rect(rect,Color.red)
+			if vertex_friction[vertex]==0:
+				draw_rect(rect,Color.blue)
+			else:
+				draw_rect(rect,Color.red)
+	
+	debug_grid_draw_time=debug_grid_draw_time*.99+(OS.get_system_time_msecs()-time)*.01

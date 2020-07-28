@@ -252,6 +252,165 @@ func __interpolate_polygons():
 	for key in added_vertexes.keys():
 		if static_vertices.find(key[0])!=-1 and static_vertices.find(key[1])!=-1:
 			static_vertices.append(added_vertexes[key])
+			
+			var poly_angle=(polygon[key[0]]-polygon[key[1]]).angle()
+			if poly_angle<0:
+				poly_angle+=PI
+			
+			var uv_angle=(uv[key[0]]-uv[key[1]]).angle()
+			if uv_angle<0:
+				uv_angle+=PI
+			
+			var angle2_delta=100.0
+			var vertex2:=-1
+			
+			var angle3_delta=100.0
+			var vertex3:=-1
+			
+			#Get closest(by uv and polygon angle sum) neightbours
+			for poly in polygons:
+				var poly_size=poly.size()
+				
+				var index=__find(poly,key[0])
+				var index2=__find(poly,key[1])
+				
+				if index!=-1:
+					for index3 in [index-1,index+1]:
+						if index3<0:
+							index3=poly_size-1
+						elif index3==poly_size:
+							index3=0
+						
+						if poly[index3]!=key[1] and __find(static_vertices,poly[index3])!=-1:
+							var temp_angle=(uv[poly[index]]-uv[poly[index3]]).angle()
+							if temp_angle<.0:
+								temp_angle+=PI
+							
+							var angle_delta=abs(uv_angle-temp_angle)
+							
+							temp_angle=(polygon[poly[index]]-polygon[poly[index3]]).angle()
+							if temp_angle<.0:
+								temp_angle+=PI
+							angle_delta+=abs(poly_angle-temp_angle)
+							
+							if angle_delta<angle2_delta:
+								angle2_delta=angle_delta
+								vertex2=poly[index3]
+				
+				if index2!=-1:
+					for index3 in [index2-1,index2+1]:
+						if index3<0:
+							index3=poly_size-1
+						elif index3==poly_size:
+							index3=0
+						
+						if poly[index3]!=key[0] and __find(static_vertices,poly[index3])!=-1:
+							var temp_angle=(uv[poly[index2]]-uv[poly[index3]]).angle()
+							if temp_angle<.0:
+								temp_angle+=PI
+							
+							var angle_delta=abs(uv_angle-temp_angle)
+							
+							temp_angle=(polygon[poly[index2]]-polygon[poly[index3]]).angle()
+							if temp_angle<.0:
+								temp_angle+=PI
+							
+							angle_delta+=abs(poly_angle-temp_angle)
+							
+							if angle_delta<angle3_delta:
+								angle3_delta=angle_delta
+								vertex3=poly[index3]
+			
+			var points=[vertex2,key[0],key[1],vertex3]
+			var points_pos=[null,polygon[key[0]],polygon[key[1]],null]
+			var uv_pos=[null,uv[key[0]],uv[key[1]],null]
+			
+			if points[0]!=-1:
+				points_pos[0]=polygon[vertex2]
+				uv_pos[0]=uv[vertex2]
+			if points[3]!=-1:
+				points_pos[3]=polygon[vertex3]
+				uv_pos[3]=uv[vertex3]
+			
+			var poly_line=AnaliticGeometry.line(points_pos[1],points_pos[2])
+			var poly_perpend=AnaliticGeometry.perpendicular(poly_line,AnaliticGeometry.middle_point(points_pos[1],points_pos[2]))
+			
+			var uv_line=AnaliticGeometry.line(uv_pos[1],uv_pos[2])
+			var uv_perpend=AnaliticGeometry.perpendicular(uv_line,AnaliticGeometry.middle_point(uv_pos[1],uv_pos[2]))
+			
+			var poly_position:=Vector2()
+			var uv_position:=Vector2()
+			
+			if points[0]!=-1:
+				var line2=AnaliticGeometry.line(points_pos[1],points_pos[0])
+				if !AnaliticGeometry.parallel_raw(poly_line,line2):
+					line2=AnaliticGeometry.perpendicular(line2,AnaliticGeometry.middle_point(points_pos[1],points_pos[0]))
+					var cross_point=AnaliticGeometry.cross_point(poly_perpend,line2)
+					
+					var dis=AnaliticGeometry.distance(cross_point,points_pos[0])
+					var new_pos=AnaliticGeometry.move_point(cross_point,poly_perpend,dis)
+					var new_pos2=AnaliticGeometry.move_point(cross_point,poly_perpend,-dis)
+					if AnaliticGeometry.line_point_distance(poly_line,new_pos)<AnaliticGeometry.line_point_distance(poly_line,new_pos2):
+						poly_position+=new_pos
+					else:
+						poly_position+=new_pos2
+				else:
+					poly_position+=AnaliticGeometry.middle_point(points_pos[1],points_pos[2])
+				
+				line2=AnaliticGeometry.line(uv_pos[1],uv_pos[0])
+				if !AnaliticGeometry.parallel_raw(uv_line,line2):
+					line2=AnaliticGeometry.perpendicular(line2,AnaliticGeometry.middle_point(uv_pos[1],uv_pos[0]))
+					var cross_point=AnaliticGeometry.cross_point(uv_perpend,line2)
+					
+					var dis=AnaliticGeometry.distance(cross_point,uv_pos[0])
+					var new_pos=AnaliticGeometry.move_point(cross_point,uv_perpend,dis)
+					var new_pos2=AnaliticGeometry.move_point(cross_point,uv_perpend,-dis)
+					if AnaliticGeometry.line_point_distance(uv_line,new_pos)<AnaliticGeometry.line_point_distance(uv_line,new_pos2):
+						uv_position+=new_pos
+					else:
+						uv_position+=new_pos2
+				else:
+					uv_position+=AnaliticGeometry.middle_point(uv_pos[1],uv_pos[2])
+			
+			if points[3]!=-1:
+				var line2=AnaliticGeometry.line(points_pos[3],points_pos[2])
+				if !AnaliticGeometry.parallel_raw(poly_line,line2):
+					line2=AnaliticGeometry.perpendicular(line2,AnaliticGeometry.middle_point(points_pos[3],points_pos[2]))
+					var cross_point=AnaliticGeometry.cross_point(poly_perpend,line2)
+					
+					var dis=AnaliticGeometry.distance(cross_point,points_pos[3])
+					var new_pos=AnaliticGeometry.move_point(cross_point,poly_perpend,dis)
+					var new_pos2=AnaliticGeometry.move_point(cross_point,poly_perpend,-dis)
+					if AnaliticGeometry.line_point_distance(poly_line,new_pos)<AnaliticGeometry.line_point_distance(poly_line,new_pos2):
+						poly_position+=new_pos
+					else:
+						poly_position+=new_pos2
+				else:
+					poly_position+=AnaliticGeometry.middle_point(points_pos[1],points_pos[2])
+				
+				line2=AnaliticGeometry.line(uv_pos[3],uv_pos[2])
+				if !AnaliticGeometry.parallel_raw(uv_line,line2):
+					line2=AnaliticGeometry.perpendicular(line2,AnaliticGeometry.middle_point(uv_pos[3],uv_pos[2]))
+					var cross_point=AnaliticGeometry.cross_point(uv_perpend,line2)
+					
+					var dis=AnaliticGeometry.distance(cross_point,uv_pos[3])
+					var new_pos=AnaliticGeometry.move_point(cross_point,uv_perpend,dis)
+					var new_pos2=AnaliticGeometry.move_point(cross_point,uv_perpend,-dis)
+					if AnaliticGeometry.line_point_distance(uv_line,new_pos)<AnaliticGeometry.line_point_distance(uv_line,new_pos2):
+						uv_position+=new_pos
+					else:
+						uv_position+=new_pos2
+				else:
+					uv_position+=AnaliticGeometry.middle_point(uv_pos[1],uv_pos[2])
+			
+			if points[0]!=-1 and points[3]!=-1:
+				poly_position/=Vector2(2,2)
+				uv_position/=Vector2(2,2)
+			
+			var vertex_id=added_vertexes[key]
+			
+			new_polygon[vertex_id]=poly_position
+			new_uv[vertex_id]=uv_position
 	
 	polygons=new_polygons
 	polygon=new_polygon
@@ -321,6 +480,12 @@ func __get_connection(vertex1,vertex2)->int:
 #returns: ret==0: pos1==pos2 ret>0: pos1>pos2 ret<0: pos1<pos2. Comparision done according to setted sort rules
 func __sort_compare(var pos1, var pos2)->float:
 	return (pos2.x-pos1.x)*x_sort+(pos2.y-pos1.y)*y_sort
+
+func __find(poolArray, value):
+	for i in range(poolArray.size()):
+		if poolArray[i]==value:
+			return i
+	return -1
 
 func displace_vertexes(displacement):
 	for vertex in vertexes:

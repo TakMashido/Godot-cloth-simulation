@@ -21,6 +21,7 @@ config/icon="res://icon.png"
 [autoload]
 
 VerletEngine="*res://VerletEngine/VerletEngine.gd"
+AnaliticGeometry="*res://Lib/AnaliticGeometry.gd"
 
 [input]
 
