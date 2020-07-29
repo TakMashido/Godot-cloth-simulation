@@ -3,11 +3,11 @@
 Cloth simulation for Godot. Created to make realistic cloaks in my project.
 Sadly not very user friendly, I'm quite new and dunno how to integrate some feauters with editor. There are settuped as Script variables
 
-![screenshot](https://raw.githubusercontent.com/TakMashido/Godot-cloth-simulation/master/screenshots/Godot_v3 2020-07-29 13-44-17-08.png)
+![screenshots](https://raw.githubusercontent.com/TakMashido/Godot-cloth-simulation/master/screenshots/Godot_v3%202020-07-29%2013-44-17-08.png)
 
 ## Dependencies
 
-[Godot 3.2.1][https://godotengine.org]
+[Godot 3.2.1](https://godotengine.org)
 
 ## Usage
 
