@@ -3,19 +3,20 @@
 Cloth simulation for Godot. Created to make realistic cloaks in my project.
 Sadly not very user friendly, I'm quite new and dunno how to integrate some feauters with editor. There are settuped as Script variables
 
+![screenshot](https://raw.githubusercontent.com/TakMashido/Godot-cloth-simulation/master/screenshots/Godot_v3 2020-07-29 13-44-17-08.png)
+
 ## Dependencies
 
-Godot 3.2.1
+[Godot 3.2.1][https://godotengine.org]
 
 ## Usage
 
 ### Demo
 Download reposity and load it as project in godot.
-### In project use
-1. Add VerletEngine/VerletEngin.gd as singleton to your project
-  * Consider using multithreaded physics with it becouse, processing large numbers of point's and connections is expensive. 
-    Verlet integration by itself will run on single thread, but other element's will not run on this heavy cluttered thread.
+Open Test1.tscn(showcase) or Test2.tscs(Benchmark) under ClothSimulation dir and press f6 to run.
 
+If it's to laggy(shouldn't be too much but tested only on my i5-7300hq, older u series processors can have problems) decrease interpolation steps of nodes useing right pane.
+### In project use
 2. Add cloth node
   1. Add Polygon2d to scene, and att VerletPolygon.gd script to it.
   2. In Polygon2D uv editor setup points and add Polygons, Script will automaticly setup desired Verlet simulation and update polygon points position with simulation resoults.

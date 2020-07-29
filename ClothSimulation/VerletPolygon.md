@@ -56,9 +56,13 @@ How many times connection have to be extended to use strech elasticity instead o
 
 ## Cloth creation
 
-Add VerletPolygon Script to Polygon2d node.
+Add VerletEngine/VerletEngine.gd as singleton to your project.
+You should also set multithreaded physics2d simulation in godot settings becouse, processing large numbers of point's and connections is computionally expensive. 
+Verlet integration by itself will run on single thread, but other element's will not run on this heavy cluttered thread.
+
+Next add VerletPolygon.gd Script to Polygon2d node wchich you want to change into animated cloth.
 Setup vertices in uv editor of polygon. UV map is used for orginal points location affecting their connections lengths.
 To setup cloth shape change points position, they will be made static.
-You also have to setup polygons. Connections are taken from their sites.
+You also have to setup polygons - connections are taken from their sites.
 
-Consider using texture with semi transparent bounds, otherwise big aliasing will be visible, and default antialisaing from polygon2d do not work there.
+The best effects gives texture with semi transparent bounds, otherwise big aliasing will be visible, antialiasing from polygon2d do not work there.

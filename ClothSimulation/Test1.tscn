@@ -9,16 +9,6 @@
 position = Vector2( 1, 0 )
 script = ExtResource( 2 )
 
-[node name="Polygon2D" type="Polygon2D" parent="."]
-position = Vector2( 704.563, 252.192 )
-texture = ExtResource( 1 )
-polygon = PoolVector2Array( 0, -3.8147e-06, 0, 256, 256, 256, 256, 0, 64, 3.8147e-06, 192, 0, 0, 64, 64, 64, 128, 64, 192, 64, 256, 64, 0, 128, 64, 128, 128, 128, 192, 128, 256, 128, 0, 192, 64, 192, 128, 192, 192, 192, 256, 192, 64, 256, 128, 256, 192, 256, 32, 0, 96, 3.8147e-06, 160, -3.8147e-06, 224, 3.8147e-06, 112, 0, 144, 0, 128, 0 )
-uv = PoolVector2Array( 0, -3.8147e-06, 0, 256, 256, 256, 256, 0, 64, 3.8147e-06, 192, 0, 0, 64, 64, 64, 128, 64, 192, 64, 256, 64, 0, 128, 64, 128, 128, 128, 192, 128, 256, 128, 0, 192, 64, 192, 128, 192, 192, 192, 256, 192, 64, 256, 128, 256, 192, 256, 32, 0, 96, 3.8147e-06, 160, -3.8147e-06, 224, 3.8147e-06, 112, 0, 144, 0, 128, 0 )
-polygons = [ PoolIntArray( 6, 24, 0 ), PoolIntArray( 6, 7, 24 ), PoolIntArray( 24, 4, 7 ), PoolIntArray( 4, 25, 7 ), PoolIntArray( 26, 5, 9 ), PoolIntArray( 9, 27, 10 ), PoolIntArray( 9, 27, 5 ), PoolIntArray( 10, 3, 27 ), PoolIntArray( 7, 12, 13, 8 ), PoolIntArray( 8, 13, 14, 9 ), PoolIntArray( 11, 16, 17, 12 ), PoolIntArray( 12, 17, 18, 13 ), PoolIntArray( 13, 18, 19, 14 ), PoolIntArray( 14, 19, 20, 15 ), PoolIntArray( 16, 1, 21, 17 ), PoolIntArray( 17, 21, 22, 18 ), PoolIntArray( 18, 22, 23, 19 ), PoolIntArray( 19, 23, 2, 20 ), PoolIntArray( 28, 30, 8 ), PoolIntArray( 30, 8, 29 ), PoolIntArray( 7, 28, 25 ), PoolIntArray( 7, 8, 28 ), PoolIntArray( 29, 9, 26 ), PoolIntArray( 29, 8, 9 ), PoolIntArray( 11, 7, 6 ), PoolIntArray( 11, 12, 7 ), PoolIntArray( 9, 15, 14 ), PoolIntArray( 9, 10, 15 ) ]
-internal_vertex_count = 27
-script = ExtResource( 4 )
-static_vertices = [ 0, 3 ]
-
 [node name="Polygon2D3" type="Polygon2D" parent="."]
 position = Vector2( 108.354, 194.688 )
 rotation = 0.549779
@@ -30,6 +20,17 @@ polygons = [ PoolIntArray( 0, 8, 6, 4 ), PoolIntArray( 6, 4, 3, 5 ), PoolIntArra
 internal_vertex_count = 5
 script = ExtResource( 4 )
 static_vertices = [ 0, 1 ]
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+position = Vector2( 721.105, 208.938 )
+texture = ExtResource( 1 )
+polygon = PoolVector2Array( 0, 0, 256, 0, 256, 256, 0, 256, 85, 0, 170, 0, 170, 85, 85, 85, 0, 85, 0, 170, 85, 170, 85, 255, 170, 255, 170, 170, 255, 170, 255, 85 )
+uv = PoolVector2Array( 0, 0, 256, 0, 256, 256, 0, 256, 85, 0, 170, 0, 170, 85, 85, 85, 0, 85, 0, 170, 85, 170, 85, 255, 170, 255, 170, 170, 255, 170, 255, 85 )
+polygons = [ PoolIntArray( 0, 4, 7, 8 ), PoolIntArray( 4, 5, 6, 7 ), PoolIntArray( 5, 1, 15, 6 ), PoolIntArray( 8, 7, 10, 9 ), PoolIntArray( 6, 15, 14, 13 ), PoolIntArray( 10, 9, 3, 11 ), PoolIntArray( 10, 13, 12, 11 ), PoolIntArray( 13, 14, 2, 12 ) ]
+internal_vertex_count = 12
+script = ExtResource( 4 )
+static_vertices = [ 0, 1 ]
+interpolation_steps = 2
 
 [node name="Polygon2D2" type="Polygon2D" parent="."]
 position = Vector2( 384.878, 258.878 )
@@ -49,7 +50,8 @@ margin_top = 0.885
 margin_right = 1021.31
 margin_bottom = 14.885
 text = "Press f1 to toggle verlet debug grid
-Use e,q to rotate cloak"
+Use e,q to rotate cloak
+Press Tab to change used node"
 __meta__ = {
 "_edit_use_anchors_": false
 }
