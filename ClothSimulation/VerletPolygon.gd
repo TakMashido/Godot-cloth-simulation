@@ -1,15 +1,23 @@
+#Code documentation in VerletPolygon.md
 extends Polygon2D
 
 enum SortType{
 	NONE=0,						#No sorting
 	FORWARD=1,					#Left/Upper site last(drawed at top)
-	REVERSED=-1					#Right/Bottom site last(drawed at top)
-}
-enum DataSource{
-	POLYGON,					#vertexes and connections from polygon
-	UV							#connection from uv(lenght), vertexes position from polygon
+	BACKWARD=-1					#Right/Bottom site last(drawed at top)
 }
 
+#Make vertices with diffrend uv and polygon positions static
+export (bool) var displaced_static=true
+#Which vertices are static, if entry negative it's ignored during adding new static based on displacement
+export (Array, int) var static_vertices=[]
+#Subarray used in chained way - for [[1,2],[3,4,5]] adds 1,2 connections and 3,4 4,5 5,3 
+export (Array, Array, int) var additional_connections=[]
+#Sort polygons
+export (SortType) var x_sort=SortType.FORWARD
+export (SortType) var y_sort=SortType.FORWARD
+export (int, 10) var interpolation_steps=1				#Waring each step increase computation time ~3 times
+export (bool) var smooth_interpolation=true				#If adjust static vertices position during interpolation to make smooth line
 #Connection types:
 #None: c'mon why you would like to use this??
 #Linear: constant elasticity connection.
@@ -32,22 +40,10 @@ enum DataSource{
 #		compress_treshold
 #		strech_treshold
 export (VerletEngine.Connection_types) var connections_type=VerletEngine.Connection_types.DoubleTresholdLinear
-#Vertices and connections data source.
-export (DataSource) var data_source=DataSource.POLYGON
-#Make vertices with diffrend uv and polygon positions static
-export (bool) var displaced_static=true
-#Which vertices are static
-export (Array, int) var static_vertices=[]
-export (int, 10) var interpolation_steps=1				#Waring each step increase computation time ~4 times
-#Sort polygons
-export (SortType) var x_sort=SortType.FORWARD
-export (SortType) var y_sort=SortType.FORWARD
 export (float,0,1.1) var compress_elasticity=.05
 export (float,0,1.1) var strech_elasticity=.8
 export (float,0,2) var compress_treshold=.8
 export (float,0,2) var strech_treshold=1.1
-#Subarray used in chained way - for [[1,2],[3,4,5]] adds 1,2 connections and 3,4 4,5 5,3 
-export (Array, Array, int) var additional_connections=[]
 
 var default_vertex_friction:=.99
 
@@ -55,27 +51,31 @@ var vertexes=PoolIntArray()
 var connections={}							#[ver1, ver2]->con_id
 
 func _ready():
-	for i in range(polygon.size()):
-		if polygon[i]!=uv[i] and static_vertices.find(i)==-1:
-			static_vertices.push_back(i)
+	#displaced verices to static
+	if displaced_static:
+		for i in range(polygon.size()):
+			if polygon[i]!=uv[i] and static_vertices.find(i)==-1 and static_vertices.find(-i):
+				static_vertices.push_back(i)
+	
+	var n=static_vertices.size()
+	var i:=0
+	while i<n:
+		if static_vertices[i]<0:
+			static_vertices.remove(i)
+			n-=1
+		else:
+			i+=1
 	
 	for _i in range(0,interpolation_steps):
 		__interpolate_polygons()
 	
-	var vertex_source
-	match data_source:
-		DataSource.POLYGON:
-			vertex_source=polygon
-		DataSource.UV:
-			vertex_source=uv
-	
 	#Discard empty polygons
-	if vertex_source.size()==0||polygons.size()==0:
+	if polygon.size()==0||polygons.size()==0:
 		assert(false,"Invalid polygon2d you have to define vertexes/polygons")
 		return
 	
 	#Vertexes from polygon
-	for vertex in vertex_source:
+	for vertex in uv:
 		vertexes.push_back(VerletEngine.add_vertex(__get_global_point_position(vertex),default_vertex_friction))
 	
 	#Connections from polygon
@@ -139,9 +139,10 @@ func _ready():
 					polygons[i+1]=swap
 	
 	#Custom connections
-	for poly in additional_connections:
-		for con in __get_polygon_connections(poly):
-			__add_connection(vertexes[con[0]],vertexes[con[1]])
+	if additional_connections!=static_vertices:					#Godot bug makes array pointer point to same aray if both teh same
+		for poly in additional_connections:
+			for con in __get_polygon_connections(poly):
+				__add_connection(vertexes[con[0]],vertexes[con[1]])
 	
 	#Change pointed vertices to static
 	for vertex in static_vertices:
@@ -165,12 +166,10 @@ func _ready():
 #		neighborhood_weight[i]/=min_weight
 #		VerletEngine.vertex_gravity[vertexes[i]]/=Vector2(neighborhood_weight[i],neighborhood_weight[i])
 	
-	#Data source fixes
-	if data_source==DataSource.UV:
-		for i in range(0,vertexes.size()):
-			var pos=polygon[i]+global_position
-			VerletEngine.vertex_position[vertexes[i]]=pos
-			VerletEngine.vertex_previous_position[vertexes[i]]=pos
+	for i in range(0,vertexes.size()):
+		var pos=__get_global_point_position(polygon[i])
+		VerletEngine.vertex_position[vertexes[i]]=pos
+		VerletEngine.vertex_previous_position[vertexes[i]]=pos
 	
 	VerletEngine.remove_static_connections(connections)
 	
@@ -252,6 +251,9 @@ func __interpolate_polygons():
 	for key in added_vertexes.keys():
 		if static_vertices.find(key[0])!=-1 and static_vertices.find(key[1])!=-1:
 			static_vertices.append(added_vertexes[key])
+			
+			if !smooth_interpolation:
+				continue
 			
 			var poly_angle=(polygon[key[0]]-polygon[key[1]]).angle()
 			if poly_angle<0:
@@ -341,6 +343,7 @@ func __interpolate_polygons():
 			var poly_position:=Vector2()
 			var uv_position:=Vector2()
 			
+			#TODO refactor, find nice way to use functional programing in godot script, following 4 blocks of code are the same except minor change in used variables
 			if points[0]!=-1:
 				var line2=AnaliticGeometry.line(points_pos[1],points_pos[0])
 				if !AnaliticGeometry.parallel_raw(poly_line,line2):
@@ -416,11 +419,10 @@ func __interpolate_polygons():
 	polygon=new_polygon
 	uv=new_uv
 
-
 func __get_global_point_position(position)->Vector2:
-	return position.rotated(rotation)+global_position
+	return position.rotated(global_rotation)+global_position
 func __get_local_point_position(position)->Vector2:
-	return (position-global_position).rotated(-rotation)
+	return (position-global_position).rotated(-global_rotation)
 
 func __add_connection(vertex1, vertex2):
 	var key=[vertex1,vertex2]
@@ -474,7 +476,7 @@ func __get_connection(vertex1,vertex2)->int:
 		
 		if vertex1==ver1 and vertex2==ver2:
 			return i
-		
+	
 	return -1
 
 #returns: ret==0: pos1==pos2 ret>0: pos1>pos2 ret<0: pos1<pos2. Comparision done according to setted sort rules
@@ -487,6 +489,7 @@ func __find(poolArray, value):
 			return i
 	return -1
 
+#Move each non static vertex by random vector
 func displace_vertexes(displacement):
 	for vertex in vertexes:
 		if VerletEngine.vertex_friction[vertex]!=0:

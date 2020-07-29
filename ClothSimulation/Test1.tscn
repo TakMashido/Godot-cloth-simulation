@@ -18,12 +18,10 @@ polygons = [ PoolIntArray( 6, 24, 0 ), PoolIntArray( 6, 7, 24 ), PoolIntArray( 2
 internal_vertex_count = 27
 script = ExtResource( 4 )
 static_vertices = [ 0, 3 ]
-interpolation_steps = 0
-additional_connections = [ [ 28, 29 ] ]
 
 [node name="Polygon2D3" type="Polygon2D" parent="."]
-position = Vector2( 109.304, 193.738 )
-rotation = 0.76969
+position = Vector2( 108.354, 194.688 )
+rotation = 0.549779
 scale = Vector2( 0.5, 0.5 )
 texture = ExtResource( 1 )
 polygon = PoolVector2Array( 0, 0, 256, 0, 256, 256, 0, 256, 0, 128, 128, 256, 128, 128, 256, 128, 128, 0 )
@@ -41,10 +39,9 @@ uv = PoolVector2Array( 0, 0, 256, 0, 256, 256, 0, 256, 160, 64, 128, 64, 96, 64,
 polygons = [ PoolIntArray( 6, 11, 17, 5 ), PoolIntArray( 17, 18, 4, 5 ), PoolIntArray( 18, 17, 16, 15 ), PoolIntArray( 17, 11, 10, 16 ), PoolIntArray( 10, 16, 13, 12 ), PoolIntArray( 15, 16, 13, 14 ), PoolIntArray( 23, 22, 6, 5 ), PoolIntArray( 23, 24, 4, 5 ), PoolIntArray( 0, 25, 26, 7 ), PoolIntArray( 26, 25, 22, 6 ), PoolIntArray( 26, 7, 8, 27 ), PoolIntArray( 26, 6, 11, 27 ), PoolIntArray( 28, 10, 12, 29 ), PoolIntArray( 28, 27, 11, 10 ), PoolIntArray( 28, 9, 3, 29 ), PoolIntArray( 28, 27, 8, 9 ), PoolIntArray( 33, 34, 1, 21 ), PoolIntArray( 33, 4, 24, 34 ), PoolIntArray( 33, 32, 18, 4 ), PoolIntArray( 33, 21, 20, 32 ), PoolIntArray( 31, 32, 20, 19 ), PoolIntArray( 31, 15, 18, 32 ), PoolIntArray( 31, 30, 14, 15 ), PoolIntArray( 31, 19, 2, 30 ) ]
 internal_vertex_count = 31
 script = ExtResource( 4 )
-data_source = 1
 static_vertices = [ 0 ]
 interpolation_steps = 2
-strech_elasticity = 0.9
+strech_elasticity = 0.957
 
 [node name="Label" type="Label" parent="."]
 margin_left = 798.313
