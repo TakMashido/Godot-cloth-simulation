@@ -40,9 +40,9 @@ export (bool) var smooth_interpolation=true				#If adjust static vertices positi
 #		compress_treshold
 #		strech_treshold
 export (VerletEngine.Connection_types) var connections_type=VerletEngine.Connection_types.DoubleTresholdLinear
-export (float,0,1.1) var compress_elasticity=.05
+export (float,0,1.1) var compress_elasticity=.01
 export (float,0,1.1) var strech_elasticity=.8
-export (float,0,2) var compress_treshold=.8
+export (float,0,2) var compress_treshold=.9
 export (float,0,2) var strech_treshold=1.1
 
 var default_vertex_friction:=.99
@@ -322,6 +322,9 @@ func __interpolate_polygons():
 							if angle_delta<angle3_delta:
 								angle3_delta=angle_delta
 								vertex3=poly[index3]
+			
+			if vertex2+vertex3==-2:
+				continue
 			
 			var points=[vertex2,key[0],key[1],vertex3]
 			var points_pos=[null,polygon[key[0]],polygon[key[1]],null]

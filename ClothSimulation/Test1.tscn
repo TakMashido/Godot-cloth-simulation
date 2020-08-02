@@ -10,7 +10,7 @@ position = Vector2( 1, 0 )
 script = ExtResource( 2 )
 
 [node name="Polygon2D3" type="Polygon2D" parent="."]
-position = Vector2( 108.354, 194.688 )
+position = Vector2( 107.404, 192.788 )
 rotation = 0.549779
 scale = Vector2( 0.5, 0.5 )
 texture = ExtResource( 1 )
@@ -20,6 +20,8 @@ polygons = [ PoolIntArray( 0, 8, 6, 4 ), PoolIntArray( 6, 4, 3, 5 ), PoolIntArra
 internal_vertex_count = 5
 script = ExtResource( 4 )
 static_vertices = [ 0, 1 ]
+compress_elasticity = 0.0
+strech_elasticity = 0.479
 
 [node name="Polygon2D" type="Polygon2D" parent="."]
 position = Vector2( 721.105, 208.938 )

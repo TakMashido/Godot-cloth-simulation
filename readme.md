@@ -15,7 +15,6 @@ Sadly not very user friendly, I'm quite new and dunno how to integrate some feau
 Download reposity and load it as project in godot.
 Open Test1.tscn(showcase) or Test2.tscs(Benchmark) under ClothSimulation dir and press f6 to run.
 
-If it's to laggy(shouldn't be too much but tested only on my i5-7300hq, older u series processors can have problems) decrease interpolation steps of nodes useing right pane.
 ### In project use
 2. Add cloth node
   1. Add Polygon2d to scene, and att VerletPolygon.gd script to it.
@@ -31,3 +30,5 @@ Code documention stored in VerletPolygon/VerletPolygon.md file.
 * Add option to interpolate only edges: smaller amunt of vertices is barery visible on places with lesser amount of details, making so will increase performace by decreasing number of vertices and connections without big quality decrease 
 * Add weight to simulated vertices  
 * Rewrite verlet engine as c++/C#(slower but easier to integrate with engine) module for better performace
+* Add tool mode based creator(make nxm grid), and interpolation in tool mode
+* Divide connections and points into chunks to be able to stop processing then when there are out of screen.

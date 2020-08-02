@@ -37,8 +37,6 @@ func perpendicular(line:Line,point=null)->Line:
 	
 	if point!=null:
 		ret.c=-ret.a*point.x-ret.b*point.y
-		
-		var site=line.a*point.x+line.b*point.y+line.c
 	
 	return ret
 

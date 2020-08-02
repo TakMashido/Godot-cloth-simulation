@@ -237,7 +237,6 @@ func __process_connection(_delta):
 			elif length>=connection_elasticity_treshold2[id]:
 				force=((length-connection_length[id])*connection_elasticity2[id])/2.0
 			else:
-#				force=((length-connection_length[id])*connection_elasticity2[id])/2.0
 				var interpolation=(length-connection_elasticity_treshold[id])/connection_elasticity_offset[id]
 				force=(length-connection_length[id])/2.0*(connection_elasticity[id]*(1-interpolation)+connection_elasticity2[id]*interpolation)
 		

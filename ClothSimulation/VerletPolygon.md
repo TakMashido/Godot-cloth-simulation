@@ -33,11 +33,11 @@ Possible values:
 How many times interpolate polygon for more simulation details.
 Each step doubles vertex count, and triples connections number.
 1 should be enought for most cases, use 2 for bigger elements(quater of screen or more).
-Warning it's increasing computation time almost 3 times by doubling vertexes number and tripling connections number.
+Warning it's increasing computation time almost 3 times by doubling vertexes number and increasing connections number 4 times.
 Also structures with more connections appers heavier, are more streched, you should consider using y scale for hindig this effect(adding vertices weight in todo list should be fixed later).
 
 #### Smooth interpolation
-Adjust static vertexes position to form more smooth line. If false new vertices added directly in middle of space beetwen them.
+Adjust static vertexes position to form smoother line. If false new vertices added directly in middle of space beetwen them.
 
 ### Physics
 
@@ -50,8 +50,7 @@ Strength of connection, affect how fast connections go back to it's orginal leng
 #### Strech elasticity
 Strength of connection, affect how fast connections go back to it's orginal length when streched. Smaller values are more rubbery.
 #### Compression treshold
-Used by DoubleTresholdLinear connections to determine when start interpolating elascity.
-#### Strech treshold
+Used by DoubleTresholdLinear connections to determine when start interpolating elascity.z
 How many times connection have to be extended to use strech elasticity instead of compress elasticity.
 
 ## Cloth creation
